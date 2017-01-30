@@ -1,5 +1,5 @@
 # newt-bot
-a discord bot written using Discord.NET API
+A discord bot written using Discord.NET API
 
 
 Discord.NET API is needed for this project:
