@@ -15,8 +15,8 @@ class Program
 
     //bot commands
 
-    string[] Commands = { ".quote", ".seen" };
-    enum ECommands { QUOTE, SEEN };
+    string[] Commands = { ".quote", ".seen", ".time" };
+    enum ECommands { QUOTE, SEEN, TIME };
 
 
     //gets a line at a given index in a file
@@ -51,26 +51,38 @@ class Program
     //commands which contain a nickname like .quote newt, .seen newt, .burn newt, etc..
     bool IsCommand(string message, ECommands command, out string output_Nickname)
     {
+        //splits the message into a array of words where delimiter is a space
+        //and checks if the first word is a command
+        //if true, 
+        //returns all other words combined into a string
+        //for example - .seen some thing
+        //here there are 3 words separated by space - ".seen", "some" and "thing".
+        //since the word[0] here is ".seen" i.e a command, this function will set output_Nickname to "some" and "thing" combined into a string with a space in between and will return true
 
         output_Nickname = "";
 
         char[] DelimeterChars = { ' ' };
-
         string[] words = message.Split(DelimeterChars);
 
+        //if the first word is a command
         if (words[0] == Commands[(int)command])
         {
+            //to support space in between nicknames like ".quote The Comet"
             if (words.Length > 2)
             {
+                //here int i = 1 cause we don't want to include first word (i.e a command) into output_Nickname
                 for (int i = 1; i < words.Length; ++i)
                 {
 
+                    //add space between each word
                     output_Nickname += words[i];
 
+                    //don't add a space at the end
                     if (i != words.Length - 1)
                     output_Nickname += " ";
                 }
             }
+            //incase there's no space in the nickname like ".quote newt"
             else if (words.Length == 2)
             {
                 output_Nickname = words[1];
@@ -97,7 +109,6 @@ class Program
             if (!e.Message.IsAuthor)
             {
 
-
                 #region Log Everything On Console
 
                 //write user's name in a different color
@@ -118,12 +129,10 @@ class Program
 
                 #region Record Messages
 
-                string FileName = e.Message.User.Name + ".txt";
-
 
                 bool RecordThisMessage = true;
 
-
+                //quick hack to make sure that the message isn't a command
                 foreach (string c in Commands)
                 {
                     if (ICS_Contains(e.Message.Text, c))
@@ -131,6 +140,9 @@ class Program
                         RecordThisMessage = false;
                     }
                 }
+
+
+                string FileName = e.Message.User.Name + ".txt";
 
 
                 if (RecordThisMessage)
@@ -225,9 +237,17 @@ class Program
 
                 #endregion
 
+                #region Get current time of the day
 
-
+                if (IsCommand(e.Message.Text, ECommands.TIME))
+                {
+                    await e.Channel.SendMessage(DateTime.Now.ToString("h:mm:ss tt"));
                 }
+
+                #endregion
+
+
+            }
         };
 
         _client.ExecuteAndWait(async () => 
